@@ -1,0 +1,13 @@
+# The main pipeline for fine_tune_bert_classifier_example
+resources:
+  pipelines:
+    fine_tune_bert_classifier_example_pipeline:
+      name: fine_tune_bert_classifier_example_pipeline
+      catalog: main
+      schema: fine_tune_bert_classifier_example_${bundle.target}
+      libraries:
+        - notebook:
+            path: ../src/dlt_pipeline.ipynb
+
+      configuration:
+        bundle.sourcePath: ${workspace.file_path}/src
