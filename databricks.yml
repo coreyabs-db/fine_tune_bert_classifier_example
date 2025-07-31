@@ -8,6 +8,20 @@ include:
   - resources/*.yml
   - resources/*/*.yml
 
+variables:
+  catalog_name:
+    description: Catalog name for the project assets.
+    default: users
+  schema_name:
+    description: Schema name for the project assets.
+    default: corey_abshire
+  workspace_resources_folder:
+    description: Location for resources like experiments.
+    default: /Users/${workspace.current_user.userName}
+  volume_root:
+    description: Root path to use for files in volumes.
+    default: /Volumes/users/corey_abshire
+
 targets:
   dev:
     # The default target uses 'mode: development' to create a development copy.
@@ -15,6 +29,7 @@ targets:
     # - Any job schedules and triggers are paused by default.
     # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
     mode: development
+    cluster_id: 0721-184932-6j5hrcb6
     default: true
     workspace:
       host: https://e2-demo-field-eng.cloud.databricks.com
@@ -32,6 +47,9 @@ targets:
       host: https://e2-demo-field-eng.cloud.databricks.com
       # We explicitly deploy to /Workspace/Users/corey.abshire@databricks.com to make sure we only have a single copy.
       root_path: /Workspace/Users/corey.abshire@databricks.com/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog_name: main
+      schema_name: corey_abshire
     permissions:
       - user_name: corey.abshire@databricks.com
         level: CAN_MANAGE

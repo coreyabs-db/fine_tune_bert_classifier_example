@@ -1,0 +1,9 @@
+resources:
+
+  registered_models:
+
+    yelp_review_classifier:
+      catalog_name: ${var.catalog_name}
+      schema_name: ${var.schema_name}
+      name: yelp_review_classifier
+

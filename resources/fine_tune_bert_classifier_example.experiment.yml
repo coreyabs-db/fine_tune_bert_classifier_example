@@ -1,0 +1,10 @@
+resources:
+
+  experiments:
+
+    classifier_experiment:
+      name: ${var.workspace_resources_folder}/classifier_example
+      permissions:
+        - level: CAN_READ
+          group_name: users
+

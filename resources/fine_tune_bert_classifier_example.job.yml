@@ -4,6 +4,9 @@ resources:
     fine_tune_bert_classifier_example_job:
       name: fine_tune_bert_classifier_example_job
 
+      tags:
+        project: ${bundle.name}
+
       trigger:
         # Run this job every day, exactly one day from the last run; see https://docs.databricks.com/api/workspace/jobs/create#trigger
         periodic:
@@ -14,24 +17,88 @@ resources:
       #  on_failure:
       #    - your_email@example.com
 
-      tasks:
-        - task_key: notebook_task
-          job_cluster_key: job_cluster
-          notebook_task:
-            notebook_path: ../src/notebook.ipynb
+      parameters:
+      - name: catalog_name
+        default: ${var.catalog_name}
+      - name: schema_name
+        default: ${var.schema_name}
+      - name: hugging_face_id
+        default: google-bert/bert-base-cased
 
-        - task_key: refresh_pipeline
+      tasks:
+        - task_key: load_docs
+          job_cluster_key: extract_load_transform_cluster
+          notebook_task:
+            notebook_path: ../tasks/load_docs.ipynb
+            base_parameters:
+              hf_datasets_cache: ${var.volume_root}/yelp_cache_dir/
+
+        - task_key: preprocess_docs
+          job_cluster_key: extract_load_transform_cluster
+          notebook_task:
+            notebook_path: ../tasks/preprocess_docs.ipynb
+            base_parameters:
+              hf_datasets_cache: ${var.volume_root}/yelp_cache_dir/
           depends_on:
-            - task_key: notebook_task
-          pipeline_task:
-            pipeline_id: ${resources.pipelines.fine_tune_bert_classifier_example_pipeline.id}
+            - task_key: load_docs
+
+        - task_key: prepare_data
+          job_cluster_key: extract_load_transform_cluster
+          notebook_task:
+            notebook_path: ../tasks/prepare_data.ipynb
+            base_parameters:
+              data_dir: ${var.volume_root}/${bundle.name}/yelp_reviews
+          depends_on:
+            - task_key: preprocess_docs
+
+        - task_key: train_model
+          job_cluster_key: training_cluster
+          notebook_task:
+            notebook_path: ../tasks/train_model.ipynb
+            base_parameters:
+              data_dir: ${var.volume_root}/${bundle.name}/yelp_reviews
+              experiment_name: ${resources.experiments.classifier_experiment.name}
+              ray_collect_to_logs_path: ${var.volume_root}/${bundle.name}/ray/logs/"
+          depends_on:
+            - task_key: prepare_data
+
+        - task_key: batch_inference
+          job_cluster_key: inference_cluster
+          notebook_task:
+            notebook_path: ../tasks/batch_inference.ipynb
+            base_parameters:
+              data_dir: ${var.volume_root}/${bundle.name}/yelp_reviews
+              experiment_name: ${resources.experiments.classifier_experiment.name}
+              ray_collect_log_to_path: ${var.volume_root}/${bundle.name}/ray_logs/"
+          depends_on:
+            - task_key: train_model
+
 
       job_clusters:
-        - job_cluster_key: job_cluster
+        - job_cluster_key: extract_load_transform_cluster
           new_cluster:
-            spark_version: 15.4.x-scala2.12
-            node_type_id: i3.xlarge
+            spark_version: 16.4.x-cpu-ml-scala2.13
+            node_type_id: rd-fleet.xlarge
             data_security_mode: SINGLE_USER
             autoscale:
-              min_workers: 1
+              min_workers: 4
               max_workers: 4
+
+        - job_cluster_key: training_cluster
+          new_cluster:
+            spark_version: 16.4.x-gpu-ml-scala2.13
+            node_type_id: g5.12xlarge
+            driver_node_type_id: g4dn.xlarge
+            data_security_mode: SINGLE_USER
+            autoscale:
+              min_workers: 2
+              max_workers: 2
+
+        - job_cluster_key: inference_cluster
+          new_cluster:
+            spark_version: 16.4.x-gpu-ml-scala2.13
+            node_type_id: g4dn.2xlarge
+            data_security_mode: SINGLE_USER
+            autoscale:
+              min_workers: 8
+              max_workers: 8
