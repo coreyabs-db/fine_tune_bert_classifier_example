@@ -58,7 +58,9 @@ resources:
             base_parameters:
               data_dir: ${var.volume_root}/${bundle.name}/yelp_reviews
               experiment_name: ${resources.experiments.classifier_experiment.name}
-              ray_collect_to_logs_path: ${var.volume_root}/${bundle.name}/ray/logs/"
+              ray_collect_log_to_path: ${var.volume_root}/${bundle.name}/ray_logs
+              ray_results_dir: ${var.volume_root}/${bundle.name}/ray_results
+              hugging_face_id: google-bert/bert-base-cased
           depends_on:
             - task_key: prepare_data
 
@@ -69,7 +71,8 @@ resources:
             base_parameters:
               data_dir: ${var.volume_root}/${bundle.name}/yelp_reviews
               experiment_name: ${resources.experiments.classifier_experiment.name}
-              ray_collect_log_to_path: ${var.volume_root}/${bundle.name}/ray_logs/"
+              ray_collect_log_to_path: ${var.volume_root}/${bundle.name}/ray_logs
+              model_name: ${resources.registered_models.yelp_review_classifier.name}
           depends_on:
             - task_key: train_model
 
