@@ -29,7 +29,7 @@ targets:
     # - Any job schedules and triggers are paused by default.
     # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
     mode: development
-    cluster_id: 0721-184932-6j5hrcb6
+    cluster_id: 0726-212508-jtwkspaq
     default: true
     workspace:
       host: https://e2-demo-field-eng.cloud.databricks.com

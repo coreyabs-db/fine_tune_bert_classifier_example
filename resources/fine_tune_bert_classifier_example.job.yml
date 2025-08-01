@@ -61,6 +61,13 @@ resources:
               ray_collect_log_to_path: ${var.volume_root}/${bundle.name}/ray_logs
               ray_results_dir: ${var.volume_root}/${bundle.name}/ray_results
               hugging_face_id: google-bert/bert-base-cased
+              model_name: ${resources.registered_models.yelp_review_classifier.name}
+              model_alias: champion
+          libraries:
+            - pypi:
+                package: psutil==7.0.0
+            - pypi:
+                package: pynvml==12.0.0
           depends_on:
             - task_key: prepare_data
 
@@ -73,6 +80,7 @@ resources:
               experiment_name: ${resources.experiments.classifier_experiment.name}
               ray_collect_log_to_path: ${var.volume_root}/${bundle.name}/ray_logs
               model_name: ${resources.registered_models.yelp_review_classifier.name}
+              model_alias: champion
           depends_on:
             - task_key: train_model
 
@@ -96,6 +104,12 @@ resources:
             autoscale:
               min_workers: 2
               max_workers: 2
+            spark_conf:
+              spark.task.resource.gpu.amount: "0"
+            spark_env_vars:
+              MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING: true
+              MLFLOW_REGISTRY_URI: databricks-uc
+              MLFLOW_ENABLE_ARTIFACTS_PROGRESS_BAR: false
 
         - job_cluster_key: inference_cluster
           new_cluster:
@@ -105,3 +119,6 @@ resources:
             autoscale:
               min_workers: 8
               max_workers: 8
+            spark_env_vars:
+              MLFLOW_REGISTRY_URI: "databricks-uc"
+              MLFLOW_ENABLE_ARTIFACTS_PROGRESS_BAR: false
