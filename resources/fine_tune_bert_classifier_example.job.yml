@@ -94,6 +94,9 @@ resources:
             autoscale:
               min_workers: 4
               max_workers: 4
+            aws_attributes:
+              first_on_demand: 1
+              availability: SPOT_WITH_FALLBACK
 
         - job_cluster_key: training_cluster
           new_cluster:
@@ -110,6 +113,9 @@ resources:
               MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING: true
               MLFLOW_REGISTRY_URI: databricks-uc
               MLFLOW_ENABLE_ARTIFACTS_PROGRESS_BAR: false
+            aws_attributes:
+              first_on_demand: 1
+              availability: SPOT_WITH_FALLBACK
 
         - job_cluster_key: inference_cluster
           new_cluster:
@@ -122,3 +128,6 @@ resources:
             spark_env_vars:
               MLFLOW_REGISTRY_URI: "databricks-uc"
               MLFLOW_ENABLE_ARTIFACTS_PROGRESS_BAR: false
+            aws_attributes:
+              first_on_demand: 1
+              availability: SPOT_WITH_FALLBACK
