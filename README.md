@@ -11,7 +11,7 @@ It demonstrates distributed parallelism over four distinct stages:
 4. **Serving endpoint**: You can optionally use the UI to deploy the model to a real-time serving endpoint.
 
 Along the way, we use MLflow to track the run and system metrics, as well as to manage the model lifecycle.
-We also use Databricks asset bundles 
+We also use Databricks asset bundles.
 
 ## Getting Started
 
