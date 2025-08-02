@@ -114,8 +114,7 @@ resources:
               MLFLOW_REGISTRY_URI: databricks-uc
               MLFLOW_ENABLE_ARTIFACTS_PROGRESS_BAR: false
             aws_attributes:
-              first_on_demand: 1
-              availability: SPOT_WITH_FALLBACK
+              availability: ON_DEMAND
 
         - job_cluster_key: inference_cluster
           new_cluster:
